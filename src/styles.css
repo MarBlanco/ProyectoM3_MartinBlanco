@@ -9,3 +9,50 @@ body {
     min-height: 100vh;
 }
 
+.character-gallery {
+    padding: 2rem 1rem;
+}
+
+.character-gallery h2 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.character-card {
+    overflow: hidden;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.character-card img {
+    display: block;
+    width: 100%;
+    height: 9rem;
+    object-fit: cover;
+}
+
+.character-card h3 {
+    margin: 0.75rem 0 0.4rem;
+}
+
+.character-card p {
+    margin-bottom: 0.75rem;
+}
+
+.character-card button {
+    width: calc(100% - 1.5rem);
+    margin-bottom: 0.75rem;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
