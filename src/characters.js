@@ -1,27 +1,30 @@
-// ARRAY QUE CONTIENE 4 OBJETOS/PERSONAJES
 export const characters = [
     {
-        id: "Yoda",
+        id: "yoda",
         name: "Master Yoda",
         description: "Sabio • Maestro Jedi",
-        Image: ""
+        image: "/src/images/yoda.jpg",
+        theme: "yoda"
     },
     {
         id: "luke",
         name: "Luke Skywalker",
         description: "Jedi • Héroe",
-        image: ""
+        image: "/src/images/luke.jpg",
+        theme: "luke"
     },
     {
         id: "vader",
         name: "Darth Vader",
         description: "Lord Sith • Guerrero",
-        image: ""
+        image: "/src/images/vader.jpg",
+        theme: "vader"
     },
     {
         id: "jar-jar",
         name: "Jar Jar Binks",
         description: "Gungan • Compañero",
-        image: ""
+        image: "/src/images/jar jar.jpg",
+        theme: "jar-jar"
     }
 ];
