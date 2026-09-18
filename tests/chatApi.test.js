@@ -74,4 +74,22 @@ describe("Cliente de chat", () => {
             "Error generating response"
         );
     });
+
+    it("debe propagar un error cuando falla la conexión", async () => {
+        // Arrange
+        fetch.mockRejectedValueOnce(
+            new Error("Network error")
+        );
+
+        // Act
+        const promise = sendChatMessage(
+            "Hola",
+            []
+        );
+
+        // Assert
+        await expect(promise).rejects.toThrow(
+            "Network error"
+        );
+    });
 });
