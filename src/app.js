@@ -1,4 +1,5 @@
 import { characters } from "./characters.js";
+import { getRoute } from "./router.js";
 
 const app = document.querySelector("#app");
 
@@ -263,19 +264,18 @@ function retryLastMessage() {
 }
 
 function router() {
-    const path = window.location.pathname;
+    const route = getRoute(window.location.pathname);
 
-    switch (path) {
-        case "/chat":
+    switch (route) {
+        case "chat":
             renderChat();
             break;
 
-        case "/about":
+        case "about":
             renderAbout();
             break;
 
-        case "/home":
-        case "/":
+        case "home":
         default:
             renderHome();
             break;
