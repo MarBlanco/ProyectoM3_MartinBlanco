@@ -3,95 +3,53 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <base href="/src/">
+
     <title>ChatWars</title>
-    <link rel="stylesheet" href="./styles.css">
+
+    <link
+        rel="stylesheet"
+        href="./styles.css"
+    >
 </head>
 
 <body>
 
-    <header class="site-header">
+    <main class="app">
 
-        <div class="brand">
-            <h1>ChatWars</h1>
-            <p>Chatea con tu personaje favorito</p>
-        </div>
+        <section id="app"></section>
 
-        <div class="device-selector" aria-label="Seleccionar dispositivo">
+        <nav class="app-navigation">
 
-            <button type="button" data-device="mobile">
-                <span aria-hidden="true">▯</span>
-                Mobile
-            </button>
+            <a href="/home">
+                <span class="nav-icon">⌂</span>
+                <span>Inicio</span>
+            </a>
 
-            <button type="button" data-device="tablet">
-                <span aria-hidden="true">▯</span>
-                Tablet
-            </button>
+            <a href="/chat">
+                <span class="nav-icon">□</span>
+                <span>Chat</span>
+            </a>
 
-            <button type="button" data-device="desktop">
-                <span aria-hidden="true">▱</span>
-                PC
-            </button>
+            <a href="/about">
+                <span class="nav-icon">ⓘ</span>
+                <span>Acerca de</span>
+            </a>
 
-        </div>
-
-    </header>
-
-    <main class="device-preview">
-
-        <section class="app-container">
-
-            <div class="status-bar">
-
-                <span>9:41</span>
-
-                <div class="status-icons">
-                    <span aria-hidden="true">▂▅▇</span>
-                    <span aria-hidden="true">◔</span>
-                    <span aria-hidden="true">▰</span>
-                </div>
-
-            </div>
-
-            <header class="app-header">
-                <h2>ChatWars</h2>
-            </header>
-
-            <div id="app">
-                <!-- La SPA renderiza aquí la vista actual -->
-            </div>
-
-            <nav class="app-navigation">
-
-                <a href="/home">
-                    <span class="nav-icon" aria-hidden="true">⌂</span>
-                    <span>Inicio</span>
-                </a>
-
-                <a href="/chat">
-                    <span class="nav-icon" aria-hidden="true">□</span>
-                    <span>Chat</span>
-                </a>
-
-                <a href="/about">
-                    <span class="nav-icon" aria-hidden="true">ⓘ</span>
-                    <span>Acerca de</span>
-                </a>
-
-            </nav>
-
-            <div class="home-indicator"></div>
-
-        </section>
+        </nav>
 
     </main>
 
-    <footer class="site-footer">
-        <p>Proyecto Integrador M3</p>
-    </footer>
-
-    <script type="module" src="./app.js"></script>
+    <script
+        type="module"
+        src="./app.js"
+    ></script>
 
 </body>
 
