@@ -1,5 +1,6 @@
 import { characters } from "./characters.js";
 import { getRoute } from "./router.js";
+import { sendChatMessage } from "./chatApi.js";
 
 const app = document.querySelector("#app");
 
@@ -213,22 +214,10 @@ async function sendMessage(message) {
     renderChat();
 
     try {
-        const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message,
-                history: conversations[selectedCharacter.id]
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error("Error en la respuesta del servidor");
-        }
-
-        const data = await response.json();
+        const data = await sendChatMessage(
+            message,
+            conversations[selectedCharacter.id]
+        );
 
         conversations[selectedCharacter.id].push({
             role: "character",
