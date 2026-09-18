@@ -24,7 +24,7 @@ export const characters = [
         id: "jar-jar",
         name: "Jar Jar Binks",
         description: "Gungan • Compañero",
-        image: "/src/images/jar jar.jpg",
+        image: "./images/jar_jar.jpg",
         theme: "jar-jar"
     }
 ];

@@ -15,5 +15,8 @@
   "type": "commonjs",
   "devDependencies": {
     "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
   }
 }
