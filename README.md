@@ -11,6 +11,9 @@ Autor: Martín Blanco
 **Aplicación:**  
 https://proyecto-m3-martin-blanco.vercel.app
 
+**Repositorio:**  
+https://github.com/MarBlanco/ProyectoM3_MartinBlanco
+
 ---
 
 ## 📋 Descripción
@@ -29,7 +32,7 @@ La aplicación utiliza el sistema de navegación SPA mediante History API y se e
 - CSS3
 - JavaScript
 - Google Gemini AI
-- Vercel Serverless Functions
+- Vercel Serverless Function
 - Vercel
 - Vitest
 - Git
@@ -51,7 +54,7 @@ La aplicación utiliza el sistema de navegación SPA mediante History API y se e
 - Navegación con los botones Atrás y Adelante del navegador.
 - Diseño responsive Mobile First.
 - API Key protegida mediante variables de entorno.
-- Integración con Vercel Serverless Functions.
+- Integración con Vercel Serverless Function.
 - Tests unitarios con Vitest.
 
 ---
@@ -132,20 +135,25 @@ vercel dev
 La aplicación estará disponible en:
 
 http://localhost:3000
-🧪 Ejecutar los tests
+🧪 Testing
 
-Para ejecutar los tests:
+Los tests fueron desarrollados utilizando Vitest.
+
+Para ejecutarlos:
 
 npm test -- --run
 
-El proyecto cuenta con:
+El proyecto cuenta con pruebas para:
 
-Tests de configuración de Vitest.
-Tests del routing.
-Tests de los personajes.
-Tests del cliente de chat.
-Tests de manejo de errores.
-Tests de errores de conexión.
+Configuración de Vitest.
+Routing.
+Datos de los personajes.
+Envío de mensajes.
+Respuestas correctas de la API.
+Errores HTTP.
+Errores de conexión.
+
+Los tests utilizan mocks para simular las llamadas externas mediante fetch.
 
 Resultado actual:
 
@@ -189,6 +197,15 @@ La personalidad del personaje seleccionado se envía al backend como contexto pa
 
 El historial de conversación también se utiliza para mantener el contexto durante la sesión.
 
+🔄 Flujo de la aplicación
+El usuario selecciona un personaje.
+Se inicia una conversación asociada al personaje.
+El usuario escribe un mensaje.
+El frontend envía el mensaje, el historial y la personalidad a /api/chat.
+La Serverless Function utiliza la API Key almacenada en variables de entorno.
+Gemini genera la respuesta según la personalidad y el contexto.
+El backend devuelve la respuesta al frontend.
+El mensaje se muestra en el chat.
 🚀 Deployment en Vercel
 
 La aplicación está desplegada en Vercel.
@@ -197,7 +214,7 @@ URL de producción
 
 https://proyecto-m3-martin-blanco.vercel.app
 
-Variables de entorno
+Variable de entorno
 
 En Vercel se configura:
 
@@ -207,25 +224,6 @@ como variable de entorno de producción.
 
 La API Key no forma parte del código fuente ni del repositorio.
 
-🧪 Testing
-
-Los tests fueron desarrollados utilizando Vitest.
-
-Se aplicaron pruebas sobre:
-
-Routing.
-Datos de los personajes.
-Envío de mensajes.
-Respuestas correctas de la API.
-Errores HTTP.
-Errores de conexión.
-
-Los tests utilizan mocks para simular las llamadas externas mediante fetch.
-
-Los tests actuales pasan correctamente:
-
-4 test files passed
-11 tests passed
 🤖 Registro de uso de IA
 
 Durante el desarrollo del proyecto se utilizó ChatGPT como herramienta de apoyo para:
@@ -247,4 +245,5 @@ Todas las respuestas fueron analizadas, adaptadas y verificadas antes de incorpo
 Martín Blanco
 
 Proyecto Integrador — Módulo 3
+
 Henry Full Stack Developer
