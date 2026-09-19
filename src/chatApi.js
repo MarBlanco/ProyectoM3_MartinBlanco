@@ -1,4 +1,8 @@
-export async function sendChatMessage(message, history) {
+export async function sendChatMessage(
+    message,
+    history,
+    personality
+) {
     const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -6,7 +10,8 @@ export async function sendChatMessage(message, history) {
         },
         body: JSON.stringify({
             message,
-            history
+            history,
+            personality
         })
     });
 

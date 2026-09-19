@@ -8,17 +8,35 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { message } = req.body;
+        const {
+            message,
+            history,
+            personality
+        } = req.body;
 
         const genAI = new GoogleGenerativeAI(
             process.env.GEMINI_API_KEY
         );
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-3.5-flash"
+            model: "gemini-3.5-flash",
+            systemInstruction: personality
         });
 
-        const result = await model.generateContent(message);
+        const chat = model.startChat({
+            history: history.map((item) => ({
+                role: item.role === "character"
+                    ? "model"
+                    : "user",
+                parts: [
+                    {
+                        text: item.content
+                    }
+                ]
+            }))
+        });
+
+        const result = await chat.sendMessage(message);
 
         const response = result.response;
 
@@ -27,7 +45,6 @@ export default async function handler(req, res) {
         return res.status(200).json({
             reply: text
         });
-
     } catch (error) {
         console.error("Error calling Gemini:", error);
 

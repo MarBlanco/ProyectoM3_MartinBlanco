@@ -216,7 +216,8 @@ async function sendMessage(message) {
     try {
         const data = await sendChatMessage(
             message,
-            conversations[selectedCharacter.id]
+            conversations[selectedCharacter.id],
+            selectedCharacter.personality
         );
 
         conversations[selectedCharacter.id].push({

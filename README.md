@@ -1,8 +1,8 @@
-# Chatea con el Master Yoda
+# Chatea con tu personaje favorito
 
 Proyecto Integrador del Módulo 3 de Henry.
 
-Aplicación web SPA que permite conversar con el personaje Master Yoda utilizando Google Gemini AI.
+Aplicación web SPA que permite conversar con el personaje que elijas utilizando Google Gemini AI.
 
 ## Tecnologías
 
