@@ -1751,3 +1751,14 @@ body::after {
         width: 100%;
     }
 }
+
+
+/* =========================
+   MOBILE - EVITAR ZOOM DE SAFARI
+   ========================= */
+
+@media (max-width: 767px) {
+    .chat-input {
+        font-size: 16px;
+    }
+}
