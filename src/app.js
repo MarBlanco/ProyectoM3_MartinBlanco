@@ -782,6 +782,35 @@ function router() {
             renderHome();
             break;
     }
+
+    updateActiveNavigation(route);
+}
+
+function updateActiveNavigation(route) {
+    const navigationLinks =
+        document.querySelectorAll(
+            ".app-navigation a"
+        );
+
+    navigationLinks.forEach((link) => {
+        const path =
+            link.getAttribute("href");
+
+        const isActive =
+            (route === "home" && path === "/") ||
+            (route === "chat" && path === "/chat") ||
+            (route === "about" && path === "/about");
+
+        link.classList.toggle(
+            "active",
+            isActive
+        );
+
+        link.setAttribute(
+            "aria-current",
+            isActive ? "page" : "false"
+        );
+    });
 }
 
 function navigate(path) {
@@ -832,6 +861,11 @@ document.addEventListener(
 
             const path =
                 link.getAttribute("href");
+
+            if (path === "/chat") {
+                selectedCharacter = null;
+                chatStatus = "idle";
+            }
 
             navigate(path);
 
