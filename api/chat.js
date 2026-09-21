@@ -20,7 +20,11 @@ export default async function handler(req, res) {
 
         const model = genAI.getGenerativeModel({
             model: "gemini-3.5-flash",
-            systemInstruction: personality
+            systemInstruction: `${personality}
+
+Responde de forma breve y natural.
+Máximo 2 o 3 frases por respuesta.
+Evita explicaciones largas y diálogos extensos.`
         });
 
         const chat = model.startChat({
