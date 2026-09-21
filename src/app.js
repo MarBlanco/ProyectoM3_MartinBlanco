@@ -6,17 +6,68 @@ const app = document.querySelector("#app");
 
 let selectedCharacter = null;
 let chatStatus = "idle";
+let isListening = false;
 
 const STORAGE_KEY = "chatwars-conversations";
+const ACCESSIBILITY_KEY = "chatwars-accessibility";
 
 const conversations =
     JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+let accessibilityEnabled =
+    localStorage.getItem(ACCESSIBILITY_KEY) === "true";
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+let recognition = null;
 
 function saveConversations() {
     localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(conversations)
     );
+}
+
+function saveAccessibilityPreference() {
+    localStorage.setItem(
+        ACCESSIBILITY_KEY,
+        String(accessibilityEnabled)
+    );
+}
+
+function speakText(text) {
+    if (
+        !accessibilityEnabled ||
+        !("speechSynthesis" in window)
+    ) {
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const speech =
+        new SpeechSynthesisUtterance(text);
+
+    speech.lang = "es-AR";
+    speech.rate = 1;
+
+    window.speechSynthesis.speak(speech);
+}
+
+function scrollMessagesToBottom() {
+    const messagesContainer =
+        document.querySelector(".chat-messages");
+
+    if (!messagesContainer) {
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        messagesContainer.scrollTop =
+            messagesContainer.scrollHeight;
+    });
 }
 
 function createCharacterCard(character) {
@@ -32,6 +83,7 @@ function createCharacterCard(character) {
                     type="button"
                     class="character-card__button"
                     data-character-id="${character.id}"
+                    aria-label="Hablar con ${character.name}"
                 >
                     Hablar
                 </button>
@@ -55,8 +107,11 @@ function renderChatList() {
         const messagesA = conversations[a.id] || [];
         const messagesB = conversations[b.id] || [];
 
-        const lastMessageA = messagesA[messagesA.length - 1];
-        const lastMessageB = messagesB[messagesB.length - 1];
+        const lastMessageA =
+            messagesA[messagesA.length - 1];
+
+        const lastMessageB =
+            messagesB[messagesB.length - 1];
 
         if (!lastMessageA && !lastMessageB) {
             return 0;
@@ -70,7 +125,10 @@ function renderChatList() {
             return -1;
         }
 
-        return lastMessageB.timestamp - lastMessageA.timestamp;
+        return (
+            lastMessageB.timestamp -
+            lastMessageA.timestamp
+        );
     });
 
     return `
@@ -82,13 +140,20 @@ function renderChatList() {
                     <p>Elegí un personaje para continuar</p>
                 </div>
 
-                <span class="chat-list__icon">✦</span>
+                <span
+                    class="chat-list__icon"
+                    aria-hidden="true"
+                >
+                    ✦
+                </span>
             </header>
 
             <div class="chat-list__items">
 
                 ${orderedCharacters.map((character) => {
-                    const messages = conversations[character.id] || [];
+                    const messages =
+                        conversations[character.id] || [];
+
                     const lastMessage =
                         messages[messages.length - 1];
 
@@ -109,11 +174,12 @@ function renderChatList() {
                                 }
                             "
                             data-chat-character-id="${character.id}"
+                            aria-label="Abrir chat con ${character.name}"
                         >
 
                             <img
                                 src="${character.image}"
-                                alt="${character.name}"
+                                alt=""
                                 class="chat-list__avatar"
                             >
 
@@ -159,7 +225,14 @@ function renderMessages() {
     return messages
         .map((message) => {
             return `
-                <div class="chat-message chat-message--${message.role}">
+                <div
+                    class="chat-message chat-message--${message.role}"
+                    aria-label="${
+                        message.role === "user"
+                            ? "Tu mensaje"
+                            : `${selectedCharacter.name} respondió`
+                    }"
+                >
                     <p>${message.content}</p>
                 </div>
             `;
@@ -168,18 +241,33 @@ function renderMessages() {
 }
 
 function renderTypingIndicator() {
-    if (!selectedCharacter || chatStatus !== "loading") {
+    if (
+        !selectedCharacter ||
+        chatStatus !== "loading"
+    ) {
         return "";
     }
 
     const characterName =
-        selectedCharacter.name.replace("Master ", "");
+        selectedCharacter.name.replace(
+            "Master ",
+            ""
+        );
 
     return `
-        <div class="chat-typing">
-            <span>${characterName} está escribiendo</span>
+        <div
+            class="chat-typing"
+            role="status"
+            aria-live="polite"
+        >
+            <span>
+                ${characterName} está escribiendo
+            </span>
 
-            <span class="chat-typing__dots">
+            <span
+                class="chat-typing__dots"
+                aria-hidden="true"
+            >
                 <span></span>
                 <span></span>
                 <span></span>
@@ -189,15 +277,24 @@ function renderTypingIndicator() {
 }
 
 function renderErrorMessage() {
-    if (!selectedCharacter || chatStatus !== "error") {
+    if (
+        !selectedCharacter ||
+        chatStatus !== "error"
+    ) {
         return "";
     }
 
     const characterName =
-        selectedCharacter.name.replace("Master ", "");
+        selectedCharacter.name.replace(
+            "Master ",
+            ""
+        );
 
     return `
-        <div class="chat-error">
+        <div
+            class="chat-error"
+            role="alert"
+        >
             <p>
                 ${characterName} está teniendo problemas para responder.
                 Intentá nuevamente en unos segundos.
@@ -206,6 +303,7 @@ function renderErrorMessage() {
             <button
                 type="button"
                 class="chat-retry-button"
+                aria-label="Reintentar último mensaje"
             >
                 Reintentar
             </button>
@@ -216,9 +314,18 @@ function renderErrorMessage() {
 function renderConversation() {
     if (!selectedCharacter) {
         return `
-            <section class="chat-empty">
+            <section
+                class="chat-empty"
+                aria-label="Selección de personaje"
+            >
                 <div class="chat-empty__content">
-                    <div class="chat-empty__icon">✦</div>
+
+                    <div
+                        class="chat-empty__icon"
+                        aria-hidden="true"
+                    >
+                        ✦
+                    </div>
 
                     <h2>Elegí un personaje</h2>
 
@@ -226,6 +333,7 @@ function renderConversation() {
                         Seleccioná un personaje para comenzar o continuar
                         una conversación.
                     </p>
+
                 </div>
             </section>
         `;
@@ -247,10 +355,13 @@ function renderConversation() {
                     ←
                 </button>
 
-                <div class="chat-character">
+                <div
+                    class="chat-character"
+                    aria-label="Conversación con ${selectedCharacter.name}"
+                >
                     <img
                         src="${selectedCharacter.image}"
-                        alt="${selectedCharacter.name}"
+                        alt=""
                     >
 
                     <div>
@@ -270,14 +381,33 @@ function renderConversation() {
                 <button
                     type="button"
                     class="chat-options-button"
-                    aria-label="Más opciones"
+                    data-accessibility-toggle
+                    aria-pressed="${accessibilityEnabled}"
+                    aria-label="${
+                        accessibilityEnabled
+                            ? "Desactivar modo accesible"
+                            : "Activar modo accesible"
+                    }"
+                    title="${
+                        accessibilityEnabled
+                            ? "Desactivar modo accesible"
+                            : "Activar modo accesible"
+                    }"
                 >
-                    ⋮
+                    ${
+                        accessibilityEnabled
+                            ? "♿✓"
+                            : "♿"
+                    }
                 </button>
 
             </header>
 
-            <div class="chat-messages">
+            <div
+                class="chat-messages"
+                aria-live="polite"
+                aria-label="Mensajes de la conversación"
+            >
 
                 ${renderMessages()}
 
@@ -287,23 +417,62 @@ function renderConversation() {
 
             </div>
 
-            <form class="chat-composer">
+            <form
+                class="chat-composer"
+                aria-label="Enviar mensaje"
+            >
 
                 <input
                     type="text"
                     class="chat-input"
                     placeholder="Escribí un mensaje..."
                     autocomplete="off"
-                    ${chatStatus === "loading" ? "disabled" : ""}
+                    aria-label="Escribí un mensaje"
+                    ${
+                        chatStatus === "loading"
+                            ? "disabled"
+                            : ""
+                    }
                 >
+
+                <button
+                    type="button"
+                    class="chat-send-button"
+                    data-voice-button
+                    aria-label="${
+                        isListening
+                            ? "Dejar de escuchar"
+                            : "Hablar por voz"
+                    }"
+                    title="${
+                        isListening
+                            ? "Escuchando..."
+                            : "Hablar por voz"
+                    }"
+                    ${
+                        chatStatus === "loading"
+                            ? "disabled"
+                            : ""
+                    }
+                >
+                    <span aria-hidden="true">
+                        ${isListening ? "🔴" : "🎙️"}
+                    </span>
+                </button>
 
                 <button
                     type="submit"
                     class="chat-send-button"
                     aria-label="Enviar mensaje"
-                    ${chatStatus === "loading" ? "disabled" : ""}
+                    ${
+                        chatStatus === "loading"
+                            ? "disabled"
+                            : ""
+                    }
                 >
-                    <span>➤</span>
+                    <span aria-hidden="true">
+                        ➤
+                    </span>
                 </button>
 
             </form>
@@ -322,14 +491,18 @@ function renderChat() {
 
         </section>
     `;
+
+    scrollMessagesToBottom();
 }
 
 function renderAbout() {
     app.innerHTML = `
         <section class="about">
+
             <h2>Acerca de</h2>
 
             <div class="about-content">
+
                 <h3>ChatWars</h3>
 
                 <p>
@@ -337,8 +510,12 @@ function renderAbout() {
                     del universo Star Wars mediante inteligencia artificial.
                 </p>
 
-                <span>Proyecto Integrador — Henry Full Stack</span>
+                <span>
+                    Proyecto Integrador — Henry Full Stack
+                </span>
+
             </div>
+
         </section>
     `;
 }
@@ -360,12 +537,19 @@ function addUserMessage(message) {
     saveConversations();
 }
 
-function renderCharacterMessage(messageElement, text) {
+function renderCharacterMessage(
+    messageElement,
+    text
+) {
     let index = 0;
 
     const interval = setInterval(() => {
-        messageElement.textContent += text[index];
+        messageElement.textContent +=
+            text[index];
+
         index++;
+
+        scrollMessagesToBottom();
 
         if (index >= text.length) {
             clearInterval(interval);
@@ -405,7 +589,9 @@ async function sendMessage(message) {
         renderChat();
 
         const messagesContainer =
-            document.querySelector(".chat-messages");
+            document.querySelector(
+                ".chat-messages"
+            );
 
         const characterMessages =
             messagesContainer?.querySelectorAll(
@@ -413,7 +599,9 @@ async function sendMessage(message) {
             );
 
         const lastMessage =
-            characterMessages?.[characterMessages.length - 1];
+            characterMessages?.[
+                characterMessages.length - 1
+            ];
 
         const messageText =
             lastMessage?.querySelector("p");
@@ -427,8 +615,13 @@ async function sendMessage(message) {
             );
         }
 
+        speakText(data.reply);
+
     } catch (error) {
-        console.error("Error sending message:", error);
+        console.error(
+            "Error sending message:",
+            error
+        );
 
         chatStatus = "error";
 
@@ -447,7 +640,10 @@ function retryLastMessage() {
     const lastMessage =
         messages[messages.length - 1];
 
-    if (!lastMessage || lastMessage.role !== "user") {
+    if (
+        !lastMessage ||
+        lastMessage.role !== "user"
+    ) {
         return;
     }
 
@@ -474,9 +670,103 @@ function selectCharacter(characterId) {
     renderChat();
 }
 
+function toggleAccessibility() {
+    accessibilityEnabled =
+        !accessibilityEnabled;
+
+    saveAccessibilityPreference();
+
+    if (accessibilityEnabled) {
+        speakText(
+            "Modo accesible activado"
+        );
+    } else {
+        window.speechSynthesis?.cancel();
+    }
+
+    renderChat();
+}
+
+function startVoiceRecognition() {
+    if (!recognition) {
+        alert(
+            "El reconocimiento de voz no está disponible en este navegador."
+        );
+
+        return;
+    }
+
+    if (!selectedCharacter) {
+        return;
+    }
+
+    if (
+        chatStatus === "loading" ||
+        isListening
+    ) {
+        return;
+    }
+
+    window.speechSynthesis?.cancel();
+
+    recognition.start();
+}
+
+if (SpeechRecognition) {
+    recognition =
+        new SpeechRecognition();
+
+    recognition.lang = "es-AR";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        isListening = true;
+        renderChat();
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        renderChat();
+    };
+
+    recognition.onerror = (event) => {
+        console.error(
+            "Error de reconocimiento de voz:",
+            event.error
+        );
+
+        isListening = false;
+
+        renderChat();
+    };
+
+    recognition.onresult = (event) => {
+        const transcript =
+            event.results[0][0]
+                .transcript
+                .trim();
+
+        if (
+            !transcript ||
+            !selectedCharacter
+        ) {
+            return;
+        }
+
+        addUserMessage(transcript);
+
+        renderChat();
+
+        sendMessage(transcript);
+    };
+}
+
 function router() {
     const route =
-        getRoute(window.location.pathname);
+        getRoute(
+            window.location.pathname
+        );
 
     switch (route) {
         case "chat":
@@ -495,113 +785,158 @@ function router() {
 }
 
 function navigate(path) {
-    history.pushState({}, "", path);
+    history.pushState(
+        {},
+        "",
+        path
+    );
 
     router();
 }
 
-document.addEventListener("click", (event) => {
-    const link =
-        event.target.closest(".app-navigation a");
+document.addEventListener(
+    "click",
+    (event) => {
+        const accessibilityButton =
+            event.target.closest(
+                "[data-accessibility-toggle]"
+            );
 
-    if (link) {
+        if (accessibilityButton) {
+            toggleAccessibility();
+            return;
+        }
+
+        const voiceButton =
+            event.target.closest(
+                "[data-voice-button]"
+            );
+
+        if (voiceButton) {
+            if (isListening) {
+                recognition?.stop();
+            } else {
+                startVoiceRecognition();
+            }
+
+            return;
+        }
+
+        const link =
+            event.target.closest(
+                ".app-navigation a"
+            );
+
+        if (link) {
+            event.preventDefault();
+
+            const path =
+                link.getAttribute("href");
+
+            navigate(path);
+
+            return;
+        }
+
+        const characterButton =
+            event.target.closest(
+                ".character-card__button"
+            );
+
+        if (characterButton) {
+            const characterId =
+                characterButton.dataset
+                    .characterId;
+
+            selectCharacter(characterId);
+
+            navigate("/chat");
+
+            return;
+        }
+
+        const chatCharacterButton =
+            event.target.closest(
+                ".chat-list__item"
+            );
+
+        if (chatCharacterButton) {
+            const characterId =
+                chatCharacterButton.dataset
+                    .chatCharacterId;
+
+            selectCharacter(characterId);
+
+            return;
+        }
+
+        const mobileBackButton =
+            event.target.closest(
+                ".chat-mobile-back-button"
+            );
+
+        if (mobileBackButton) {
+            selectedCharacter = null;
+            chatStatus = "idle";
+
+            renderChat();
+
+            return;
+        }
+
+        const retryButton =
+            event.target.closest(
+                ".chat-retry-button"
+            );
+
+        if (retryButton) {
+            retryLastMessage();
+        }
+    }
+);
+
+document.addEventListener(
+    "submit",
+    (event) => {
+        const form =
+            event.target.closest(
+                ".chat-composer"
+            );
+
+        if (
+            !form ||
+            chatStatus === "loading"
+        ) {
+            return;
+        }
+
         event.preventDefault();
 
-        const path =
-            link.getAttribute("href");
+        if (!selectedCharacter) {
+            return;
+        }
 
-        navigate(path);
+        const input =
+            form.querySelector(
+                ".chat-input"
+            );
 
-        return;
-    }
+        const message =
+            input.value.trim();
 
-    const characterButton =
-        event.target.closest(
-            ".character-card__button"
-        );
+        if (!message) {
+            return;
+        }
 
-    if (characterButton) {
-        const characterId =
-            characterButton.dataset.characterId;
+        input.value = "";
 
-        selectCharacter(characterId);
-
-        navigate("/chat");
-
-        return;
-    }
-
-    const chatCharacterButton =
-        event.target.closest(
-            ".chat-list__item"
-        );
-
-    if (chatCharacterButton) {
-        const characterId =
-            chatCharacterButton.dataset
-                .chatCharacterId;
-
-        selectCharacter(characterId);
-
-        return;
-    }
-
-    const mobileBackButton =
-        event.target.closest(
-            ".chat-mobile-back-button"
-        );
-
-    if (mobileBackButton) {
-        selectedCharacter = null;
-        chatStatus = "idle";
+        addUserMessage(message);
 
         renderChat();
 
-        return;
+        sendMessage(message);
     }
-
-    const retryButton =
-        event.target.closest(
-            ".chat-retry-button"
-        );
-
-    if (retryButton) {
-        retryLastMessage();
-    }
-});
-
-document.addEventListener("submit", (event) => {
-    const form =
-        event.target.closest(".chat-composer");
-
-    if (!form || chatStatus === "loading") {
-        return;
-    }
-
-    event.preventDefault();
-
-    if (!selectedCharacter) {
-        return;
-    }
-
-    const input =
-        form.querySelector(".chat-input");
-
-    const message =
-        input.value.trim();
-
-    if (!message) {
-        return;
-    }
-
-    input.value = "";
-
-    addUserMessage(message);
-
-    renderChat();
-
-    sendMessage(message);
-});
+);
 
 window.addEventListener(
     "popstate",
