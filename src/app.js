@@ -7,7 +7,17 @@ const app = document.querySelector("#app");
 let selectedCharacter = null;
 let chatStatus = "idle";
 
-const conversations = {};
+const STORAGE_KEY = "chatwars-conversations";
+
+const conversations =
+    JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+function saveConversations() {
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(conversations)
+    );
+}
 
 function createCharacterCard(character) {
     return `
@@ -41,6 +51,28 @@ function renderHome() {
 }
 
 function renderChatList() {
+    const orderedCharacters = [...characters].sort((a, b) => {
+        const messagesA = conversations[a.id] || [];
+        const messagesB = conversations[b.id] || [];
+
+        const lastMessageA = messagesA[messagesA.length - 1];
+        const lastMessageB = messagesB[messagesB.length - 1];
+
+        if (!lastMessageA && !lastMessageB) {
+            return 0;
+        }
+
+        if (!lastMessageA) {
+            return 1;
+        }
+
+        if (!lastMessageB) {
+            return -1;
+        }
+
+        return lastMessageB.timestamp - lastMessageA.timestamp;
+    });
+
     return `
         <aside class="chat-list">
 
@@ -55,7 +87,7 @@ function renderChatList() {
 
             <div class="chat-list__items">
 
-                ${characters.map((character) => {
+                ${orderedCharacters.map((character) => {
                     const messages = conversations[character.id] || [];
                     const lastMessage =
                         messages[messages.length - 1];
@@ -121,7 +153,8 @@ function renderMessages() {
         return "";
     }
 
-    const messages = conversations[selectedCharacter.id] || [];
+    const messages =
+        conversations[selectedCharacter.id] || [];
 
     return messages
         .map((message) => {
@@ -317,8 +350,27 @@ function addUserMessage(message) {
 
     conversations[selectedCharacter.id].push({
         role: "user",
-        content: message
+        content: message,
+        timestamp: Date.now()
     });
+
+    conversations[selectedCharacter.id] =
+        conversations[selectedCharacter.id].slice(-50);
+
+    saveConversations();
+}
+
+function renderCharacterMessage(messageElement, text) {
+    let index = 0;
+
+    const interval = setInterval(() => {
+        messageElement.textContent += text[index];
+        index++;
+
+        if (index >= text.length) {
+            clearInterval(interval);
+        }
+    }, 25);
 }
 
 async function sendMessage(message) {
@@ -339,12 +391,42 @@ async function sendMessage(message) {
 
         conversations[selectedCharacter.id].push({
             role: "character",
-            content: data.reply
+            content: data.reply,
+            timestamp: Date.now()
         });
+
+        conversations[selectedCharacter.id] =
+            conversations[selectedCharacter.id].slice(-50);
+
+        saveConversations();
 
         chatStatus = "idle";
 
         renderChat();
+
+        const messagesContainer =
+            document.querySelector(".chat-messages");
+
+        const characterMessages =
+            messagesContainer?.querySelectorAll(
+                ".chat-message--character"
+            );
+
+        const lastMessage =
+            characterMessages?.[characterMessages.length - 1];
+
+        const messageText =
+            lastMessage?.querySelector("p");
+
+        if (messageText) {
+            messageText.textContent = "";
+
+            renderCharacterMessage(
+                messageText,
+                data.reply
+            );
+        }
+
     } catch (error) {
         console.error("Error sending message:", error);
 
@@ -359,9 +441,11 @@ function retryLastMessage() {
         return;
     }
 
-    const messages = conversations[selectedCharacter.id];
+    const messages =
+        conversations[selectedCharacter.id];
 
-    const lastMessage = messages[messages.length - 1];
+    const lastMessage =
+        messages[messages.length - 1];
 
     if (!lastMessage || lastMessage.role !== "user") {
         return;
@@ -391,7 +475,8 @@ function selectCharacter(characterId) {
 }
 
 function router() {
-    const route = getRoute(window.location.pathname);
+    const route =
+        getRoute(window.location.pathname);
 
     switch (route) {
         case "chat":
@@ -416,21 +501,24 @@ function navigate(path) {
 }
 
 document.addEventListener("click", (event) => {
-    const link = event.target.closest(".app-navigation a");
+    const link =
+        event.target.closest(".app-navigation a");
 
     if (link) {
         event.preventDefault();
 
-        const path = link.getAttribute("href");
+        const path =
+            link.getAttribute("href");
 
         navigate(path);
 
         return;
     }
 
-    const characterButton = event.target.closest(
-        ".character-card__button"
-    );
+    const characterButton =
+        event.target.closest(
+            ".character-card__button"
+        );
 
     if (characterButton) {
         const characterId =
@@ -443,22 +531,25 @@ document.addEventListener("click", (event) => {
         return;
     }
 
-    const chatCharacterButton = event.target.closest(
-        ".chat-list__item"
-    );
+    const chatCharacterButton =
+        event.target.closest(
+            ".chat-list__item"
+        );
 
     if (chatCharacterButton) {
         const characterId =
-            chatCharacterButton.dataset.chatCharacterId;
+            chatCharacterButton.dataset
+                .chatCharacterId;
 
         selectCharacter(characterId);
 
         return;
     }
 
-    const mobileBackButton = event.target.closest(
-        ".chat-mobile-back-button"
-    );
+    const mobileBackButton =
+        event.target.closest(
+            ".chat-mobile-back-button"
+        );
 
     if (mobileBackButton) {
         selectedCharacter = null;
@@ -469,9 +560,10 @@ document.addEventListener("click", (event) => {
         return;
     }
 
-    const retryButton = event.target.closest(
-        ".chat-retry-button"
-    );
+    const retryButton =
+        event.target.closest(
+            ".chat-retry-button"
+        );
 
     if (retryButton) {
         retryLastMessage();
@@ -479,7 +571,8 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("submit", (event) => {
-    const form = event.target.closest(".chat-composer");
+    const form =
+        event.target.closest(".chat-composer");
 
     if (!form || chatStatus === "loading") {
         return;
@@ -491,8 +584,11 @@ document.addEventListener("submit", (event) => {
         return;
     }
 
-    const input = form.querySelector(".chat-input");
-    const message = input.value.trim();
+    const input =
+        form.querySelector(".chat-input");
+
+    const message =
+        input.value.trim();
 
     if (!message) {
         return;
@@ -507,6 +603,9 @@ document.addEventListener("submit", (event) => {
     sendMessage(message);
 });
 
-window.addEventListener("popstate", router);
+window.addEventListener(
+    "popstate",
+    router
+);
 
 router();
