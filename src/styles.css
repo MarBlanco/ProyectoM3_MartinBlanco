@@ -1554,6 +1554,19 @@ body::after {
         width: 100%;
     }
 
+    /* Cuando hay un personaje seleccionado, mobile muestra
+       solamente la conversación. */
+    .chat-layout:has(.chat-conversation) .chat-list {
+        display: none;
+    }
+
+    .chat-layout:has(.chat-conversation) .chat-conversation {
+        display: flex;
+
+        width: 100%;
+        flex: 1;
+    }
+
     .chat-empty {
         display: none;
     }
