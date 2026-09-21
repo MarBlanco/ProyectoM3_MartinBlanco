@@ -388,8 +388,10 @@ body::after {
     background: rgba(100, 130, 255, 0.08);
 }
 
-.app-navigation a:first-child {
+.app-navigation a.active {
     color: #8190ff;
+
+    background: rgba(100, 130, 255, 0.08);
 
     text-shadow:
         0 0 12px rgba(100, 120, 255, 0.7);
@@ -1384,9 +1386,16 @@ body::after {
    ========================= */
 
 @media (min-width: 1024px) {
+    #app:has(.chat-layout) {
+        padding: 0;
+    }
 
-    #app {
-        padding: 2.5rem 2rem 6rem;
+    #app:has(.chat-layout) .chat-layout {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border-radius: 0;
+        height: calc(100svh - 68px);
     }
 
     .home::before {
@@ -1554,19 +1563,6 @@ body::after {
         width: 100%;
     }
 
-    /* Cuando hay un personaje seleccionado, mobile muestra
-       solamente la conversación. */
-    .chat-layout:has(.chat-conversation) .chat-list {
-        display: none;
-    }
-
-    .chat-layout:has(.chat-conversation) .chat-conversation {
-        display: flex;
-
-        width: 100%;
-        flex: 1;
-    }
-
     .chat-empty {
         display: none;
     }
@@ -1618,5 +1614,106 @@ body::after {
     .chat-send-button {
         width: 2.6rem;
         height: 2.6rem;
+    }
+}
+
+
+/* =========================
+   CHAT FULL WIDTH
+   ========================= */
+
+/* Mobile */
+@media (max-width: 767px) {
+    #app:has(.chat-layout) {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+    #app:has(.chat-layout) {
+        padding-left: 0;
+        padding-right: 0;
+        padding-bottom: 0;
+    }
+}
+
+
+/* Chat sin margen superior en tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+    #app:has(.chat-layout) {
+        padding-top: 0;
+    }
+}
+
+
+/* =========================
+   CHAT TABLET FULL SCREEN
+   ========================= */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    #app:has(.chat-layout) {
+        padding: 0;
+    }
+
+    #app:has(.chat-layout) .chat-layout {
+        width: 100%;
+        max-width: none;
+
+        height: calc(100svh - 68px);
+        min-height: 0;
+
+        margin: 0;
+
+        border: none;
+        border-radius: 0;
+
+        box-shadow: none;
+    }
+}
+
+
+/* =========================
+   TABLET - HEADERS ALINEADOS
+   ========================= */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .chat-list__header,
+    .chat-header {
+        min-height: 4.5rem;
+        height: 4.5rem;
+    }
+}
+
+
+/* =========================
+   MOBILE - LISTA / CHAT
+   ========================= */
+
+@media (max-width: 767px) {
+
+    /*
+     * Sin personaje seleccionado:
+     * se muestra la lista completa.
+     *
+     * Con personaje seleccionado:
+     * se oculta la lista y se muestra
+     * únicamente la conversación.
+     */
+
+    .chat-layout:has(.chat-conversation) .chat-list {
+        display: none;
+    }
+
+    .chat-layout:has(.chat-conversation) .chat-conversation {
+        display: flex;
+        width: 100%;
+        flex: 1;
+    }
+
+    .chat-layout:has(.chat-conversation) {
+        width: 100%;
     }
 }
