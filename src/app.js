@@ -295,7 +295,17 @@ function renderAbout() {
     app.innerHTML = `
         <section class="about">
             <h2>Acerca de</h2>
-            <p>Información sobre ChatWars.</p>
+
+            <div class="about-content">
+                <h3>ChatWars</h3>
+
+                <p>
+                    Una SPA interactiva para conversar con personajes
+                    del universo Star Wars mediante inteligencia artificial.
+                </p>
+
+                <span>Proyecto Integrador — Henry Full Stack</span>
+            </div>
         </section>
     `;
 }
