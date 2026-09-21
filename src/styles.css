@@ -884,10 +884,11 @@ body::after {
 }
 
 .chat-character img {
-    width: 3rem;
-    height: 3rem;
+    width: 3.2rem;
+    height: 3.2rem;
 
     object-fit: cover;
+    object-position: center top;
 
     border: 2px solid #7a6aff;
 
@@ -1457,6 +1458,12 @@ body::after {
         width: 340px;
     }
 
+    .chat-list__header,
+    .chat-header {
+        min-height: 4.5rem;
+        height: 4.5rem;
+    }
+
     .chat-list__header {
         padding: 1rem 1.3rem;
     }
@@ -1478,6 +1485,33 @@ body::after {
         max-width: 65%;
 
         font-size: 0.9rem;
+    }
+}
+
+
+/* =========================
+   CHAT TABLET / DESKTOP - ALTURA INFERIOR
+   ========================= */
+
+@media (min-width: 768px) {
+    .app-navigation {
+        height: 68px;
+        box-sizing: border-box;
+        padding: 0.5rem 1rem;
+    }
+
+    .chat-layout {
+        height: calc(100svh - 68px);
+        min-height: 0;
+    }
+
+    .chat-header,
+    .chat-composer {
+        flex-shrink: 0;
+    }
+
+    .chat-messages {
+        min-height: 0;
     }
 }
 
@@ -1578,8 +1612,8 @@ body::after {
     }
 
     .chat-character img {
-        width: 2.8rem;
-        height: 2.8rem;
+        width: 3rem;
+        height: 3rem;
     }
 
     .chat-character strong {

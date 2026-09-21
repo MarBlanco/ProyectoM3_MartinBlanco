@@ -9,13 +9,9 @@ let chatStatus = "idle";
 let isListening = false;
 
 const STORAGE_KEY = "chatwars-conversations";
-const ACCESSIBILITY_KEY = "chatwars-accessibility";
 
 const conversations =
     JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-
-let accessibilityEnabled =
-    localStorage.getItem(ACCESSIBILITY_KEY) === "true";
 
 const SpeechRecognition =
     window.SpeechRecognition ||
@@ -28,32 +24,6 @@ function saveConversations() {
         STORAGE_KEY,
         JSON.stringify(conversations)
     );
-}
-
-function saveAccessibilityPreference() {
-    localStorage.setItem(
-        ACCESSIBILITY_KEY,
-        String(accessibilityEnabled)
-    );
-}
-
-function speakText(text) {
-    if (
-        !accessibilityEnabled ||
-        !("speechSynthesis" in window)
-    ) {
-        return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const speech =
-        new SpeechSynthesisUtterance(text);
-
-    speech.lang = "es-AR";
-    speech.rate = 1;
-
-    window.speechSynthesis.speak(speech);
 }
 
 function scrollMessagesToBottom() {
@@ -378,29 +348,6 @@ function renderConversation() {
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    class="chat-options-button"
-                    data-accessibility-toggle
-                    aria-pressed="${accessibilityEnabled}"
-                    aria-label="${
-                        accessibilityEnabled
-                            ? "Desactivar modo accesible"
-                            : "Activar modo accesible"
-                    }"
-                    title="${
-                        accessibilityEnabled
-                            ? "Desactivar modo accesible"
-                            : "Activar modo accesible"
-                    }"
-                >
-                    ${
-                        accessibilityEnabled
-                            ? "♿✓"
-                            : "♿"
-                    }
-                </button>
-
             </header>
 
             <div
@@ -615,8 +562,6 @@ async function sendMessage(message) {
             );
         }
 
-        speakText(data.reply);
-
     } catch (error) {
         console.error(
             "Error sending message:",
@@ -670,23 +615,6 @@ function selectCharacter(characterId) {
     renderChat();
 }
 
-function toggleAccessibility() {
-    accessibilityEnabled =
-        !accessibilityEnabled;
-
-    saveAccessibilityPreference();
-
-    if (accessibilityEnabled) {
-        speakText(
-            "Modo accesible activado"
-        );
-    } else {
-        window.speechSynthesis?.cancel();
-    }
-
-    renderChat();
-}
-
 function startVoiceRecognition() {
     if (!recognition) {
         alert(
@@ -706,8 +634,6 @@ function startVoiceRecognition() {
     ) {
         return;
     }
-
-    window.speechSynthesis?.cancel();
 
     recognition.start();
 }
@@ -826,16 +752,6 @@ function navigate(path) {
 document.addEventListener(
     "click",
     (event) => {
-        const accessibilityButton =
-            event.target.closest(
-                "[data-accessibility-toggle]"
-            );
-
-        if (accessibilityButton) {
-            toggleAccessibility();
-            return;
-        }
-
         const voiceButton =
             event.target.closest(
                 "[data-voice-button]"
