@@ -444,27 +444,118 @@ function renderChat() {
 
 function renderAbout() {
     app.innerHTML = `
-        <section class="about">
+        <section
+            class="about-opening"
+            aria-label="Acerca de ChatWars"
+        >
 
-            <h2>Acerca de</h2>
+            <div
+                class="about-stars"
+                aria-hidden="true"
+            ></div>
 
-            <div class="about-content">
+            <button
+                type="button"
+                class="about-skip-button"
+                data-about-skip
+            >
+                Saltar intro
+            </button>
 
-                <h3>ChatWars</h3>
-
+            <div class="about-intro">
                 <p>
-                    Una SPA interactiva para conversar con personajes
-                    del universo Star Wars mediante inteligencia artificial.
+                    Hace mucho tiempo, en una galaxia muy, muy lejana...
                 </p>
+            </div>
 
-                <span>
-                    Proyecto Integrador — Henry Full Stack
-                </span>
+            <div
+                class="about-crawl"
+                aria-live="polite"
+            >
+                <div class="about-crawl__content">
+
+                    <h1>CHATWARS</h1>
+
+                    <h2>
+                        Proyecto Integrador — Henry Full Stack
+                    </h2>
+
+                    <p>
+                        En este proyecto se desarrolló una SPA interactiva
+                        que permite conversar con personajes del universo
+                        de Star Wars mediante inteligencia artificial.
+                    </p>
+
+                    <p>
+                        La aplicación utiliza JavaScript para construir una
+                        navegación SPA mediante History API, permitiendo
+                        cambiar entre las distintas vistas sin recargar la página.
+                    </p>
+
+                    <p>
+                        Los usuarios pueden elegir entre diferentes personajes
+                        y mantener conversaciones con ellos. Cada conversación
+                        puede conservarse localmente para continuarla más tarde.
+                    </p>
+
+                    <p>
+                        Las respuestas son generadas mediante la API de Gemini.
+                        Para proteger la API Key, la comunicación con Gemini pasa
+                        por una función Serverless desplegada en Vercel.
+                    </p>
+
+                    <p>
+                        El proyecto incorpora programación asíncrona, Fetch API,
+                        manejo de estados de carga y error, LocalStorage y
+                        reconocimiento de voz cuando el navegador lo permite.
+                    </p>
+
+                    <p>
+                        La interfaz fue desarrollada con diseño responsive para
+                        adaptarse a dispositivos móviles, tablets y desktop.
+                    </p>
+
+                    <p class="about-crawl__final">
+                        ChatWars.<br>
+                        Una experiencia interactiva para explorar una galaxia
+                        muy, muy lejana.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="about-end">
+
+                <div class="about-end__content">
+
+                    <h2>CHATWARS</h2>
+
+                    <p>
+                        Elegí tu personaje. Iniciá la conversación.
+                    </p>
+
+                    <button
+                        type="button"
+                        class="about-start-button"
+                        data-about-start
+                    >
+                        Comenzar misión
+                    </button>
+
+                </div>
 
             </div>
 
         </section>
     `;
+
+    window.setTimeout(() => {
+        document
+            .querySelector(".about-opening")
+            ?.classList.add(
+                "about-opening--complete"
+            );
+    }, 31000);
 }
 
 function addUserMessage(message) {
@@ -648,11 +739,13 @@ if (SpeechRecognition) {
 
     recognition.onstart = () => {
         isListening = true;
+
         renderChat();
     };
 
     recognition.onend = () => {
         isListening = false;
+
         renderChat();
     };
 
@@ -763,6 +856,32 @@ document.addEventListener(
             } else {
                 startVoiceRecognition();
             }
+
+            return;
+        }
+
+        const aboutSkipButton =
+            event.target.closest(
+                "[data-about-skip]"
+            );
+
+        if (aboutSkipButton) {
+            document
+                .querySelector(".about-opening")
+                ?.classList.add(
+                    "about-opening--complete"
+                );
+
+            return;
+        }
+
+        const aboutStartButton =
+            event.target.closest(
+                "[data-about-start]"
+            );
+
+        if (aboutStartButton) {
+            navigate("/chat");
 
             return;
         }
