@@ -109,13 +109,6 @@ function renderChatList() {
                     <h1>Chats</h1>
                     <p>Elegí un personaje para continuar</p>
                 </div>
-
-                <span
-                    class="chat-list__icon"
-                    aria-hidden="true"
-                >
-                    ✦
-                </span>
             </header>
 
             <div class="chat-list__items">
@@ -289,13 +282,6 @@ function renderConversation() {
                 aria-label="Selección de personaje"
             >
                 <div class="chat-empty__content">
-
-                    <div
-                        class="chat-empty__icon"
-                        aria-hidden="true"
-                    >
-                        ✦
-                    </div>
 
                     <h2>Elegí un personaje</h2>
 
@@ -600,6 +586,14 @@ async function sendMessage(message) {
         return;
     }
 
+    /*
+     * Guardamos el personaje que inició la petición.
+     * Así la respuesta queda asociada al personaje correcto,
+     * aunque el usuario cambie de personaje mientras espera.
+     */
+    const character = selectedCharacter;
+    const characterId = character.id;
+
     chatStatus = "loading";
 
     renderChat();
@@ -607,20 +601,32 @@ async function sendMessage(message) {
     try {
         const data = await sendChatMessage(
             message,
-            conversations[selectedCharacter.id],
-            selectedCharacter.personality
+            conversations[characterId],
+            character.personality
         );
 
-        conversations[selectedCharacter.id].push({
+        /*
+         * La respuesta siempre se guarda en la conversación
+         * del personaje que inició la petición.
+         */
+        conversations[characterId].push({
             role: "character",
             content: data.reply,
             timestamp: Date.now()
         });
 
-        conversations[selectedCharacter.id] =
-            conversations[selectedCharacter.id].slice(-50);
+        conversations[characterId] =
+            conversations[characterId].slice(-50);
 
         saveConversations();
+
+        /*
+         * Si el usuario cambió de personaje mientras Gemini
+         * respondía, no modificamos la interfaz actual.
+         */
+        if (selectedCharacter?.id !== characterId) {
+            return;
+        }
 
         chatStatus = "idle";
 
@@ -658,6 +664,15 @@ async function sendMessage(message) {
             "Error sending message:",
             error
         );
+
+        /*
+         * Si el usuario cambió de personaje mientras
+         * la petición estaba pendiente, tampoco mostramos
+         * el error en la conversación actual.
+         */
+        if (selectedCharacter?.id !== characterId) {
+            return;
+        }
 
         chatStatus = "error";
 
